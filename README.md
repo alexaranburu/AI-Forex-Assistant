@@ -108,7 +108,7 @@ Next, we need to send the predicted output back to Power Apps. Thus, we ask Copi
 At this point, we need to configure each of the blocks in our flow. Firstly, we open the "PowerApps (V2)" block and add all the input data that will come from Power Apps. Likewise, we are going to add an output at the "Respond to a PowerApp or flow" block that will be linked to the response of our AI prediction model (use the lightning icon to do this):
 
 ![Image](/images/automate_5.PNG)
-![Image](/images/automate_6.PNG)
+![Image](/images/automate_6-Copy.PNG)
 <br><br>
 Regarding the "Predict" block, we are going to choose the model created in Step 3 and select all of the five advanced parameters (inputs) of the model. Make sure to connect each advanced parameter with the data from the previous block using the lightning icon.
 
