@@ -1,4 +1,4 @@
-# AI Forex Assistant
+# AI Forex Assistant (GenAI - Copilot)
 This repository contains a step-by-step guide of how to create an AI Forex Assistant using Microsoft Power Platform tools like Power Apps and Power Automate, making use of latest Generative AI technology such as Copilot. The goal is to create a user dashboard where a foreign exchange pair evolution is displayed, together with supporting data.
 
 In this specific case and for illustration purposes, the selected foreign exchange pair has been the CHF/EUR pair. In addition, historical Gross Domestic Product (GDP) growth rates and interest rates of Switzerland and the European Union are used as supporting data. Not only that, but the user can also ask the AI Forex Assistant to predict next month's exchange rate. Thanks to a trained Machine Learning model on historical data, the AI Forex Assistant is then able to estimate the future value considering market trends.
@@ -71,12 +71,12 @@ Next, we are going to ask Copilot to Add a button with a text that says "Predict
 <br><br>
 <br><br>
 ## 3.- Generate and train a Custom Prediction Model in AI Builder
-We are now finished with the design of the dashboard user interface and we can move on to the next step, which involves generating and training a Custom Prediction Model in AI Builder inside Power Apps. If we go to the AI Hub section from the Power Apps homepage and select the AI models, we are presented with a list of prebuilt and custom models that can be used within Power Apps and Power Automate:
+We are now finished with the design of the dashboard user interface and we can move on to the next step, which involves generating and training a Custom Prediction Model in AI Builder inside Power Apps. If we go to the AI Hub section from the Power Apps homepage and access the AI models (it can also be done from Power Automate), we are presented with a list of prebuilt and custom models that can be used within Power Apps and Power Automate:
 
 ![Image](/images/model_1.PNG)
 
 
-For this use case, we are going to select and create a "Predict future outcomes from historical data" custom model. The difference between prebuilt models and custom models is that custom models need to be trained with your own dataset. For the purpose of creating this guide, we are going to use our very simple dataset, consisting of 51 rows of historical data (the minimum number of samples for any custom models is 50). Please refer to the disclaimer to read more about the model employed for this guide.
+For this use case, we are going to select and create a "Predict future outcomes from historical data" custom model. The difference between prebuilt models and custom models is that custom models need to be trained with your own dataset. For the purpose of creating this guide, we are going to use our very simple dataset, consisting of 51 rows of historical data (the minimum number of samples for any custom models is 50). Please refer to the disclaimer at the bottom of this guide to read more about the model employed for this application.
 
 As a first step, we must select the CHF to EUR column in our Currency Data table as the historical outcomes the model should study to predict future values. Next, we are going to select which are the feature inputs of the model that will influence the prediction. In this case, we are going to select the supporting historical data that is directly correlated to future exchange rates, that is, the CH and EU GDP Growth, together with the CHF and EUR Interest Rates. Do not forget to include the time context of our data by including the Month column as well:
 
@@ -90,7 +90,60 @@ After that, we can skip the filtering step and continue with the model training.
 <br><br>
 <br><br>
 ## 4.- Create a flow in Power Automate with Copilot to predict future values
+Power Automate is a very powerful tool that allows to quickly automate tasks, consisting of various steps, into one single flow. The created flow can be a Desktop flow, Cloud flow or Business process flow depending on the target application. In our case, we need to create a Cloud flow, which will be triggered from our dashboard user interface when hitting the "Predict Future Exchange Rate" button. Since the trigger will happen from Power Apps, this will be an instant cloud flow. Similarly, automated cloud flows or scheduled cloud flows can also be used in Power Automate for different types of triggering methods.
 
+What is more, since Copilot has been recently introduced in Power Automate, these steps and flows can now be created using Generative AI techniques, through Prompt Engineering. Therefore, we are going to describe to Copilot what kind of task we want to automate in Power Automate. With our information, Copilot will already know that the new flow needs to be an instant cloud flow. This is the employed Copilot prompt and the corresponding output:
+
+![Image](/images/automate_1.PNG)
+![Image](/images/automate_2.PNG)
+
+In appearance, the suggested flow seems to meet our requirements, but it is far from perfect. Do not get frustrated, you can always ask Copilot to suggest a different flow or you can have an iterative conversation with it in order improve your flow. After reviewing the connections, we are going to create the flow and start modifying it. We notice that the predict action does not allow to add AI models, so we tell Copilot to remove it and directly ask how we can add an action from AI Builder. After following the instructions of Copilot, the flow should look like this:
+
+![Image](/images/automate_3.PNG)
+<br><br>
+Next, we need to send the predicted output back to Power Apps. Thus, we ask Copilot, "How can I respond to Power Apps?". Following its suggestion, we add the "Respond to a Power App or flow" action, like this:
+
+![Image](/images/automate_4.PNG)
+<br><br>
+At this point, we need to configure each of the blocks in our flow. Firstly, we open the "PowerApps (V2)" block and add all the input data that will come from Power Apps. Likewise, we are going to add an output at the "Respond to a PowerApp or flow" block that will contain the response of our AI prediction model:
+
+![Image](/images/automate_5.PNG)
+![Image](/images/automate_6.PNG)
+<br><br>
+Regarding the "Predict" block, we are going to select the model created in Step 3 and select all of the five advanced parameters (inputs) of the model. Make sure to connect each advanced parameter with the data from the previous block using the lightning sign.
+
+![Image](/images/automate_7.PNG)
+
+The flow is now ready to be used. Nevertheless, before we prepare the flow interface on the Power Apps side, it is highly adviceable to test the created flow. We can do this by using the "Test this flow" functionality provided by Copilot. We will perform a manual test by introducing static input data:
+
+![Image](/images/automate_8.PNG)
+
+Lastly, we run the flow and observe the results of the test. Power Automate provides runtime information about each block, such as the required execution time, the received inputs or the produced outputs.
+
+![Image](/images/automate_9.PNG)
+<br><br>
+In this case, we can see that it took 10 seconds to execute the prediction and that the predicted CHF/EUR exchange rate in the test has been 1.03, matching the ground truth. We are now ready to move on to the final step of our guide.
+<br><br>
+<br><br>
+## 5.- Integrate the Power Automate flow into Power Apps and test the application
+Going back to Power Apps, we need to import the newly created and tested Power Automate flow. For that, we are going to go to the Power Automate section in the left pane menu and add our flow:
+
+![Image](/images/integrate_1.PNG)
+<br><br>
+After that, we are going to run the flow every time we click the "Predict Future Exchange Rate" button. This can be done using Power Platform specific syntax by calling the flow Run() function as part of the button OnSelect formula. The Run() function needs to be fed with its five inputs: CH GDP Growth, EU GDP Growth, CHF Interest Rate and EUR Interest Rate. Therefore, we make sure to pass the last value of each of this parameters from our data table. Additionally, we want to copy the output of the flow to the global variable "varFutureExchangeRate" using the Set() function, so that it gets displayed in the text label of our dashboard user interface. The final formula can be found hereafter:
+
+![Image](/images/integrate_2.PNG)
+<br><br>
+
+As a final step, we are going to save our application and hit the play button in Power Apps to preview and test the app. The application preview should be generated without any errors and the forex predictur should be able to predict the future CHF/EUR value after pressing the "Predict Future Exchange Rate" button, like this:
+
+![Image](/images/dashboard_final.PNG)
+<br><br>
+It is always a good practice to check if the flow was run correctly. We verify that in the Run History within Power Automate, and fortunately we see that everything worked out like a charm:
+
+![Image](/images/integrate_3.PNG)
+<br><br>
+**Congratulations! The development of the application is now finalized!**
 
 <br><br>
 ## Disclaimer
