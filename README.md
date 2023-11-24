@@ -31,7 +31,7 @@ The first thing that we need to do is to ask Copilot what kind of App we want to
 
 * Provide information about the format of the output.
 
-* Do not expect the same exact output from the same prompot always. Copilot and all LLM models are non-deterministic so the output might vary each time.
+* Do not expect the same exact output from the same prompt always. Copilot and all LLM models are non-deterministic so the output might vary each time.
 
 In our case, we will ask Copilot that we want to build an application to display CHF to EUR exchange rates and supporting data like CH GDP Growth, EU GDP Growth, CHF Interest Rate and EUR Interest Rate, where each value corresponds to a month:
 
@@ -76,7 +76,7 @@ We are now finished with the design of the dashboard user interface and we can m
 ![Image](/images/model_1.PNG)
 
 
-For this use case, we are going to select and create a "Predict future outcomes from historical data" custom model. The difference between prebuilt models and custom models is that custom models need to be trained with your own dataset. For the purpose of creating this guide, we are going to use our very simple dataset, consisting of 51 rows of historical data (the minimum number of samples for any custom models is 50). Please refer to the disclaimer at the bottom of this guide to read more about the model employed for this application.
+For this use case, we are going to select and create a "Predict future outcomes from historical data" custom model. The difference between prebuilt models and custom models is that custom models need to be trained with your own dataset. For the purpose of creating this guide, we are going to use our very simple dataset, consisting of 51 samples of historical data (the minimum number of samples for any custom model is 50). Please refer to the disclaimer at the bottom of this guide to read more about the model employed for this application.
 
 As a first step, we must select the CHF to EUR column in our Currency Data table as the historical outcomes the model should study to predict future values. Next, we are going to select which are the feature inputs of the model that will influence the prediction. In this case, we are going to select the supporting historical data that is directly correlated to future exchange rates, that is, the CH and EU GDP Growth, together with the CHF and EUR Interest Rates. Do not forget to include the time context of our data by including the Month column as well:
 
@@ -97,7 +97,7 @@ What is more, since Copilot has been recently introduced in Power Automate, thes
 ![Image](/images/automate_1.PNG)
 ![Image](/images/automate_2.PNG)
 
-In appearance, the suggested flow seems to meet our requirements, but it is far from perfect. Do not get frustrated, you can always ask Copilot to suggest a different flow or you can have an iterative conversation with it in order improve your flow. After reviewing the connections, we are going to create the flow and start modifying it. We notice that the predict action does not allow to add AI models, so we tell Copilot to remove it and directly ask how we can add an action from AI Builder. After following the instructions of Copilot, the flow should look like this:
+In appearance, the suggested flow seems to meet our requirements, but it is far from perfect. Do not get frustrated, you can always ask Copilot to suggest a different flow or you can have an iterative conversation with it in order improve your flow. After reviewing the connections, we are going to create the flow and start modifying it. We notice that the predict action does not allow to add AI models, so we tell Copilot to remove it and directly ask how we can add an action from AI Builder. After following the suggested instructions of Copilot, the flow should look like this:
 
 ![Image](/images/automate_3.PNG)
 <br><br>
@@ -105,12 +105,12 @@ Next, we need to send the predicted output back to Power Apps. Thus, we ask Copi
 
 ![Image](/images/automate_4.PNG)
 <br><br>
-At this point, we need to configure each of the blocks in our flow. Firstly, we open the "PowerApps (V2)" block and add all the input data that will come from Power Apps. Likewise, we are going to add an output at the "Respond to a PowerApp or flow" block that will contain the response of our AI prediction model:
+At this point, we need to configure each of the blocks in our flow. Firstly, we open the "PowerApps (V2)" block and add all the input data that will come from Power Apps. Likewise, we are going to add an output at the "Respond to a PowerApp or flow" block that will be linked to the response of our AI prediction model (use the lightning icon to do this):
 
 ![Image](/images/automate_5.PNG)
 ![Image](/images/automate_6.PNG)
 <br><br>
-Regarding the "Predict" block, we are going to select the model created in Step 3 and select all of the five advanced parameters (inputs) of the model. Make sure to connect each advanced parameter with the data from the previous block using the lightning sign.
+Regarding the "Predict" block, we are going to choose the model created in Step 3 and select all of the five advanced parameters (inputs) of the model. Make sure to connect each advanced parameter with the data from the previous block using the lightning icon.
 
 ![Image](/images/automate_7.PNG)
 
@@ -130,12 +130,12 @@ Going back to Power Apps, we need to import the newly created and tested Power A
 
 ![Image](/images/integrate_1.PNG)
 <br><br>
-After that, we are going to run the flow every time we click the "Predict Future Exchange Rate" button. This can be done using Power Platform specific syntax by calling the flow Run() function as part of the button OnSelect formula. The Run() function needs to be fed with its five inputs: CH GDP Growth, EU GDP Growth, CHF Interest Rate and EUR Interest Rate. Therefore, we make sure to pass the last value of each of this parameters from our data table. Additionally, we want to copy the output of the flow to the global variable "varFutureExchangeRate" using the Set() function, so that it gets displayed in the text label of our dashboard user interface. The final formula can be found hereafter:
+After that, we are going program the flow to run every time we click the "Predict Future Exchange Rate" button. This can be done using Power Platform specific syntax by calling the flow Run() function as part of the button OnSelect formula. The Run() function needs to be fed with its five inputs: CH GDP Growth, EU GDP Growth, CHF Interest Rate, EUR Interest Rate and Month. Therefore, we make sure to pass the last value of each of this parameters from our data table. Additionally, we want to copy the output of the flow to the global variable "varFutureExchangeRate" using the Set() function, so that it gets displayed in the text label of our dashboard user interface. The final formula can be found hereafter:
 
 ![Image](/images/integrate_2.PNG)
 <br><br>
 
-As a final step, we are going to save our application and hit the play button in Power Apps to preview and test the app. The application preview should be generated without any errors and the forex predictur should be able to predict the future CHF/EUR value after pressing the "Predict Future Exchange Rate" button, like this:
+As a final step, we are going to save our application and hit the play button in Power Apps to preview and test the app. The application preview should be generated without any errors and the Forex Predictor should be able to predict the future CHF/EUR value after pressing the "Predict Future Exchange Rate" button, like this:
 
 ![Image](/images/dashboard_final.PNG)
 <br><br>
